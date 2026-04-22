@@ -1,4 +1,4 @@
-play games in your consol:(function() {
+play games in your consol: (function() { 
   const canvas = document.createElement('canvas');
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -13,16 +13,18 @@ play games in your consol:(function() {
   document.body.style.padding = '0';
   document.body.style.overflow = 'hidden';
   document.body.appendChild(canvas);
-  
+
   const ctx = canvas.getContext('2d');
   const gridSize = 20;
-  
+
   let gameState = 'mainMenu';
   let gameMode = 'single';
   let snake1 = [{x: 10, y: 10}];
   let snake2 = [{x: Math.floor(canvas.width / gridSize) - 20, y: Math.floor(canvas.height / gridSize) - 20}];
   let apples = [{x: 15, y: 15}, {x: 20, y: 20}, {x: 25, y: 25}];
   let bananas = [{x: 12, y: 12}, {x: 18, y: 18}];
+  let oranges = [{x: 8, y: 8}, {x: 35, y: 35}, {x: 40, y: 15}];
+  let raspberries = [{x: 22, y: 22}, {x: 30, y: 8}, {x: 5, y: 40}];
   let enemies = [{x: 30, y: 30}, {x: 40, y: 40}];
   let dx1 = 1, dy1 = 0;
   let nextDx1 = 1, nextDy1 = 0;
@@ -37,12 +39,12 @@ play games in your consol:(function() {
   let enemyMoveCounter = 0;
   let enemyMoveSpeed = 3;
   let gameOverTimer = 0;
-  
+
   window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
   });
-  
+
   function requestFullscreen() {
     if (canvas.requestFullscreen) {
       canvas.requestFullscreen().catch(err => console.log('Fullscreen request failed:', err));
@@ -54,17 +56,29 @@ play games in your consol:(function() {
       canvas.msRequestFullscreen();
     }
   }
-  
+
   window.addEventListener('keydown', (e) => {
     if (gameState === 'mainMenu') {
       if (e.key === '1') selectMode('single');
       if (e.key === '2') selectMode('multi');
     } else if (gameState === 'playing') {
-      if (e.key === 'ArrowUp' && dy1 === 0) { nextDx1 = 0; nextDy1 = -1; }
-      if (e.key === 'ArrowDown' && dy1 === 0) { nextDx1 = 0; nextDy1 = 1; }
-      if (e.key === 'ArrowLeft' && dx1 === 0) { nextDx1 = -1; nextDy1 = 0; }
-      if (e.key === 'ArrowRight' && dx1 === 0) { nextDx1 = 1; nextDy1 = 0; }
-      
+      if (e.key === 'ArrowUp' && dy1 === 0) {
+        nextDx1 = 0;
+        nextDy1 = -1;
+      }
+      if (e.key === 'ArrowDown' && dy1 === 0) {
+        nextDx1 = 0;
+        nextDy1 = 1;
+      }
+      if (e.key === 'ArrowLeft' && dx1 === 0) {
+        nextDx1 = -1;
+        nextDy1 = 0;
+      }
+      if (e.key === 'ArrowRight' && dx1 === 0) {
+        nextDx1 = 1;
+        nextDy1 = 0;
+      }
+
       if (gameMode === 'multi') {
         if (e.key === 'w' && dy2 === 0) { nextDx2 = 0; nextDy2 = -1; }
         if (e.key === 's' && dy2 === 0) { nextDx2 = 0; nextDy2 = 1; }
@@ -75,7 +89,7 @@ play games in your consol:(function() {
       if (e.key === 'ArrowDown') goToMainMenu();
     }
   });
-  
+
   function selectMode(mode) {
     gameMode = mode;
     gameState = 'playing';
@@ -83,17 +97,23 @@ play games in your consol:(function() {
     requestFullscreen();
     gameLoop();
   }
-  
+
   function resetGame() {
     snake1 = [{x: 10, y: 10}];
     snake2 = [{x: Math.floor(canvas.width / gridSize) - 20, y: Math.floor(canvas.height / gridSize) - 20}];
     apples = [{x: 15, y: 15}, {x: 20, y: 20}, {x: 25, y: 25}];
     bananas = [{x: 12, y: 12}, {x: 18, y: 18}];
+    oranges = [{x: 8, y: 8}, {x: 35, y: 35}, {x: 40, y: 15}];
+    raspberries = [{x: 22, y: 22}, {x: 30, y: 8}, {x: 5, y: 40}];
     enemies = [{x: 30, y: 30}, {x: 40, y: 40}];
-    dx1 = 1; dy1 = 0;
-    nextDx1 = 1; nextDy1 = 0;
-    dx2 = -1; dy2 = 0;
-    nextDx2 = -1; nextDy2 = 0;
+    dx1 = 1;
+    dy1 = 0;
+    nextDx1 = 1;
+    nextDy1 = 0;
+    dx2 = -1;
+    dy2 = 0;
+    nextDx2 = -1;
+    nextDy2 = 0;
     score1 = 0;
     score2 = 0;
     costume1 = 'default';
@@ -101,32 +121,44 @@ play games in your consol:(function() {
     enemyMoveCounter = 0;
     gameOverTimer = 0;
   }
-  
+
   function spawnApple() {
     let x = Math.floor(Math.random() * (canvas.width / gridSize));
     let y = Math.floor(Math.random() * (canvas.height / gridSize));
     apples.push({x: x, y: y});
   }
-  
+
   function spawnBanana() {
     let x = Math.floor(Math.random() * (canvas.width / gridSize));
     let y = Math.floor(Math.random() * (canvas.height / gridSize));
     bananas.push({x: x, y: y});
   }
-  
+
+  function spawnOrange() {
+    let x = Math.floor(Math.random() * (canvas.width / gridSize));
+    let y = Math.floor(Math.random() * (canvas.height / gridSize));
+    oranges.push({x: x, y: y});
+  }
+
+  function spawnRaspberry() {
+    let x = Math.floor(Math.random() * (canvas.width / gridSize));
+    let y = Math.floor(Math.random() * (canvas.height / gridSize));
+    raspberries.push({x: x, y: y});
+  }
+
   function spawnEnemy() {
     let x = Math.floor(Math.random() * (canvas.width / gridSize));
     let y = Math.floor(Math.random() * (canvas.height / gridSize));
     enemies.push({x: x, y: y});
   }
-  
+
   function moveEnemies() {
     enemyMoveCounter++;
     if (enemyMoveCounter < enemyMoveSpeed) {
       return;
     }
     enemyMoveCounter = 0;
-    
+
     for (let enemy of enemies) {
       let dirX = 0, dirY = 0;
       
@@ -150,7 +182,7 @@ play games in your consol:(function() {
       enemy.y = (enemy.y + maxY) % maxY;
     }
   }
-  
+
   function updateCostume(score, isPlayer2 = false) {
     if (score >= 500) {
       if (isPlayer2) costume2 = 'neon';
@@ -163,37 +195,37 @@ play games in your consol:(function() {
       else costume1 = 'golden';
     }
   }
-  
+
   function gameLoop() {
     if (gameState !== 'playing') return;
-    
+
     dx1 = nextDx1;
     dy1 = nextDy1;
-    
+
     let head1 = {
       x: snake1[0].x + dx1,
       y: snake1[0].y + dy1
     };
-    
+
     const maxX = Math.floor(canvas.width / gridSize);
     const maxY = Math.floor(canvas.height / gridSize);
     head1.x = (head1.x + maxX) % maxX;
     head1.y = (head1.y + maxY) % maxY;
-    
+
     for (let i = 0; i < snake1.length; i++) {
       if (head1.x === snake1[i].x && head1.y === snake1[i].y) {
         endGame();
         return;
       }
     }
-    
+
     for (let enemy of enemies) {
       if (head1.x === enemy.x && head1.y === enemy.y) {
         endGame();
         return;
       }
     }
-    
+
     if (gameMode === 'multi') {
       for (let segment of snake2) {
         if (head1.x === segment.x && head1.y === segment.y) {
@@ -202,10 +234,12 @@ play games in your consol:(function() {
         }
       }
     }
-    
+
     snake1.unshift(head1);
-    
+
     let ate1 = false;
+    
+    // Check apples
     for (let i = 0; i < apples.length; i++) {
       if (head1.x === apples[i].x && head1.y === apples[i].y) {
         score1 += 10;
@@ -216,7 +250,8 @@ play games in your consol:(function() {
         break;
       }
     }
-    
+
+    // Check bananas
     if (!ate1) {
       for (let i = 0; i < bananas.length; i++) {
         if (head1.x === bananas[i].x && head1.y === bananas[i].y) {
@@ -229,11 +264,39 @@ play games in your consol:(function() {
         }
       }
     }
-    
+
+    // Check oranges
+    if (!ate1) {
+      for (let i = 0; i < oranges.length; i++) {
+        if (head1.x === oranges[i].x && head1.y === oranges[i].y) {
+          score1 += 35;
+          oranges.splice(i, 1);
+          spawnOrange();
+          updateCostume(score1, false);
+          ate1 = true;
+          break;
+        }
+      }
+    }
+
+    // Check raspberries
+    if (!ate1) {
+      for (let i = 0; i < raspberries.length; i++) {
+        if (head1.x === raspberries[i].x && head1.y === raspberries[i].y) {
+          score1 += 50;
+          raspberries.splice(i, 1);
+          spawnRaspberry();
+          updateCostume(score1, false);
+          ate1 = true;
+          break;
+        }
+      }
+    }
+
     if (!ate1) {
       snake1.pop();
     }
-    
+
     if (gameMode === 'multi') {
       dx2 = nextDx2;
       dy2 = nextDy2;
@@ -270,6 +333,8 @@ play games in your consol:(function() {
       snake2.unshift(head2);
       
       let ate2 = false;
+      
+      // Check apples
       for (let i = 0; i < apples.length; i++) {
         if (head2.x === apples[i].x && head2.y === apples[i].y) {
           score2 += 10;
@@ -281,6 +346,7 @@ play games in your consol:(function() {
         }
       }
       
+      // Check bananas
       if (!ate2) {
         for (let i = 0; i < bananas.length; i++) {
           if (head2.x === bananas[i].x && head2.y === bananas[i].y) {
@@ -293,23 +359,51 @@ play games in your consol:(function() {
           }
         }
       }
+
+      // Check oranges
+      if (!ate2) {
+        for (let i = 0; i < oranges.length; i++) {
+          if (head2.x === oranges[i].x && head2.y === oranges[i].y) {
+            score2 += 35;
+            oranges.splice(i, 1);
+            spawnOrange();
+            updateCostume(score2, true);
+            ate2 = true;
+            break;
+          }
+        }
+      }
+
+      // Check raspberries
+      if (!ate2) {
+        for (let i = 0; i < raspberries.length; i++) {
+          if (head2.x === raspberries[i].x && head2.y === raspberries[i].y) {
+            score2 += 50;
+            raspberries.splice(i, 1);
+            spawnRaspberry();
+            updateCostume(score2, true);
+            ate2 = true;
+            break;
+          }
+        }
+      }
       
       if (!ate2) {
         snake2.pop();
       }
     }
-    
+
     moveEnemies();
-    
+
     let totalScore = gameMode === 'multi' ? score1 + score2 : score1;
     if (totalScore > 0 && totalScore % 100 === 0 && enemies.length < 5) {
       spawnEnemy();
     }
-    
+
     draw();
     setTimeout(gameLoop, 100);
   }
-  
+
   function endGame() {
     gameState = 'gameOver';
     finalScore1 = score1;
@@ -317,7 +411,7 @@ play games in your consol:(function() {
     gameOverTimer = 0;
     draw();
   }
-  
+
   function goToMainMenu() {
     gameState = 'mainMenu';
     if (document.fullscreenElement) {
@@ -331,11 +425,11 @@ play games in your consol:(function() {
     }
     draw();
   }
-  
+
   function draw() {
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+
     if (gameState === 'mainMenu') {
       drawMainMenu();
     } else if (gameState === 'playing') {
@@ -346,17 +440,17 @@ play games in your consol:(function() {
       drawGameOver();
     }
   }
-  
+
   function drawMainMenu() {
     ctx.fillStyle = '#00FF00';
     ctx.font = 'bold 80px Arial';
     ctx.textAlign = 'center';
     ctx.fillText('SNAKE GAME', canvas.width / 2, canvas.height / 2 - 200);
-    
+
     ctx.fillStyle = '#FFFFFF';
     ctx.font = '40px Arial';
     ctx.fillText('Select Game Mode', canvas.width / 2, canvas.height / 2 - 50);
-    
+
     ctx.fillStyle = '#00AA00';
     ctx.fillRect(canvas.width / 2 - 250, canvas.height / 2 + 50, 200, 80);
     ctx.fillStyle = '#000000';
@@ -365,7 +459,7 @@ play games in your consol:(function() {
     ctx.fillStyle = '#FFFFFF';
     ctx.font = '20px Arial';
     ctx.fillText('SINGLE PLAYER', canvas.width / 2 - 150, canvas.height / 2 + 135);
-    
+
     ctx.fillStyle = '#FF00FF';
     ctx.fillRect(canvas.width / 2 + 50, canvas.height / 2 + 50, 200, 80);
     ctx.fillStyle = '#000000';
@@ -374,12 +468,12 @@ play games in your consol:(function() {
     ctx.fillStyle = '#FFFFFF';
     ctx.font = '20px Arial';
     ctx.fillText('MULTIPLAYER', canvas.width / 2 + 150, canvas.height / 2 + 135);
-    
+
     ctx.fillStyle = '#FFFF00';
     ctx.font = '18px Arial';
     ctx.fillText('Player 1: Arrow Keys | Player 2: WASD', canvas.width / 2, canvas.height / 2 + 250);
   }
-  
+
   function drawGame() {
     function drawSnake(snake, costume) {
       let headColor, bodyColor;
@@ -396,7 +490,7 @@ play games in your consol:(function() {
         headColor = '#00FF00';
         bodyColor = '#00AA00';
       }
-      
+
       ctx.fillStyle = bodyColor;
       for (let i = 1; i < snake.length; i++) {
         ctx.fillRect(snake[i].x * gridSize, snake[i].y * gridSize, gridSize - 2, gridSize - 2);
@@ -405,22 +499,44 @@ play games in your consol:(function() {
       ctx.fillStyle = headColor;
       ctx.fillRect(snake[0].x * gridSize, snake[0].y * gridSize, gridSize - 2, gridSize - 2);
     }
-    
+
     drawSnake(snake1, costume1);
     if (gameMode === 'multi') {
       drawSnake(snake2, costume2);
     }
-    
+
+    // Draw apples
     ctx.fillStyle = '#FF0000';
     for (let a of apples) {
       ctx.fillRect(a.x * gridSize + 2, a.y * gridSize + 2, gridSize - 4, gridSize - 4);
     }
-    
+
+    // Draw bananas
     ctx.fillStyle = '#FFFF00';
     for (let b of bananas) {
       ctx.fillRect(b.x * gridSize + 2, b.y * gridSize + 2, gridSize - 4, gridSize - 4);
     }
-    
+
+    // Draw oranges
+    ctx.fillStyle = '#FFA500';
+    for (let o of oranges) {
+      ctx.beginPath();
+      ctx.arc(o.x * gridSize + gridSize / 2, o.y * gridSize + gridSize / 2, gridSize / 2 - 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Draw raspberries
+    ctx.fillStyle = '#C71585';
+    for (let r of raspberries) {
+      ctx.beginPath();
+      ctx.arc(r.x * gridSize + gridSize / 2, r.y * gridSize + gridSize / 2, gridSize / 2 - 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#FF1493';
+      ctx.fillRect(r.x * gridSize + gridSize / 2 - 2, r.y * gridSize + 2, 4, 4);
+      ctx.fillStyle = '#C71585';
+    }
+
+    // Draw enemies
     ctx.fillStyle = '#FF00FF';
     for (let enemy of enemies) {
       ctx.beginPath();
@@ -430,7 +546,8 @@ play games in your consol:(function() {
       ctx.lineWidth = 2;
       ctx.stroke();
     }
-    
+
+    // Draw scores and costumes
     ctx.fillStyle = '#FFFFFF';
     ctx.font = '20px Arial';
     ctx.textAlign = 'left';
@@ -443,16 +560,16 @@ play games in your consol:(function() {
       ctx.fillText('Costume: ' + costume1, 10, 60);
     }
   }
-  
+
   function drawGameOver() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+
     ctx.fillStyle = '#FF0000';
     ctx.font = 'bold 70px Arial';
     ctx.textAlign = 'center';
     ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 100);
-    
+
     ctx.fillStyle = '#FFFFFF';
     ctx.font = 'bold 40px Arial';
     if (gameMode === 'multi') {
@@ -461,12 +578,11 @@ play games in your consol:(function() {
     } else {
       ctx.fillText('Final Score: ' + finalScore1, canvas.width / 2, canvas.height / 2 + 50);
     }
-    
+
     ctx.fillStyle = '#00FF00';
     ctx.font = 'bold 30px Arial';
     ctx.fillText('Press DOWN for Main Menu', canvas.width / 2, canvas.height / 2 + 150);
   }
-  
+
   draw();
 })();
-
